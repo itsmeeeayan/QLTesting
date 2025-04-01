@@ -163,8 +163,8 @@ st.image("MAze.png", use_column_width=True)
 animation_speed = st.slider("Animation Speed (seconds per step)", 0.1, 2.0, 0.5)
 
 # Define image paths for the two scenarios.
-optimal_path_images = ["Jerry.png", "Cheese .png", "Blank1.png", "Goal.png"]
-caught_path_images = ["Jerry.png", "Cheese.png", "TomJErry.png"]
+optimal_path_images = ["Jerry.png", "Cheese.png", "Blank1.png", "Goal.png"]
+caught_path_images = ["Jerry.png", "CHEESE.png", "TomJErry.png"]
 
 scenario = st.selectbox("Select Scenario", 
                           ["Optimal Path: Cheese then Home", "Alternate: Gets Caught by Tom"])
