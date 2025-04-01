@@ -151,7 +151,7 @@ animation_speed = st.slider("Animation Speed (seconds per step)", 0.1, 2.0, 1.5)
 
 # --- Define Image Paths for the Two Scenarios ---
 # Update these paths as necessary.
-optimal_path_images = ["Jerry.png", "Cheese.png", "Blank1.png", "Goal.png"]
+optimal_path_images = ["Jerry.png", "CHEESE.png", "Blank1.png", "Goal.png"]
 caught_path_images = ["Jerry.png", "CHEESE.png", "TomJErry.png"]
 
 scenario = st.selectbox("Select Scenario", 
