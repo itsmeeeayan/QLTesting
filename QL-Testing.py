@@ -37,7 +37,7 @@ class MazeEnv:
         self.reset()
 
     def reset(self):
-        # Start at S0, no cheese collected yet.
+        # Start at S0; no cheese collected yet.
         self.state = 0
         self.steps = 0
         self.cheese_collected = False
@@ -59,28 +59,28 @@ class MazeEnv:
         elif action == 3:  # Right
             next_col += 1
 
-        # Check bounds; if move is out-of-bound, remain in current state.
+        # If move is out-of-bound, stay in current cell.
         if next_row < 0 or next_row >= ROWS or next_col < 0 or next_col >= COLS:
             next_row, next_col = current_row, current_col
 
         next_state = pos_to_state((next_row, next_col))
         reward = 0
 
-        # Determine rewards:
-        if next_state == 4:   # S4: Tom's cell => caught
+        # Reward conditions:
+        if next_state == 4:  # Tom's cell
             reward = -10
             self.done = True
-        elif next_state == 5:  # S5: Home => goal
+        elif next_state == 5:  # Home
             reward = +10
             self.done = True
-        elif next_state == 1:  # S1: Cheese cell
+        elif next_state == 1:  # Cheese cell
             if not self.cheese_collected:
                 reward = +1
                 self.cheese_collected = True
             else:
                 reward = 0
         else:
-            reward = 0  # Empty cell
+            reward = 0
 
         self.state = next_state
         self.steps += 1
@@ -90,51 +90,48 @@ class MazeEnv:
         return self.state, reward, self.done
 
 # -----------------------------------
-# Q-learning Training Section
+# Q-learning Training
 # -----------------------------------
 
-# Q-learning parameters
+# Q-learning parameters:
 alpha = 0.1    # learning rate
 gamma = 0.99   # discount factor
 epsilon = 0.2  # exploration rate
 num_episodes = 1000
 
-# Initialize Q-table (all values 0) for 6 states x 4 actions.
+# Initialize Q-table (all zeros) for 6 states x 4 actions.
 initial_Q_table = np.zeros((ROWS * COLS, len(ACTIONS)))
-Q_table = np.copy(initial_Q_table)  # Working Q-table
-
+Q_table = np.copy(initial_Q_table)
 env = MazeEnv()
 
-# Display the initial Q-table before training.
+# Display the initial Q-table in sidebar.
 st.sidebar.subheader("Initial Q-Table (All Zeros)")
 for s in range(ROWS * COLS):
     pos = state_to_pos(s)
-    st.sidebar.write(f"State {s} {pos}: {initial_Q_table[s, :]}")
+    st.sidebar.write(f"State S{s} {pos}: {initial_Q_table[s, :]}")
 
-# Run Q-learning algorithm
+# Run Q-learning algorithm:
 for episode in range(num_episodes):
     state = env.reset()
     while True:
-        # Epsilon-greedy action selection
+        # Epsilon-greedy action selection:
         if random.uniform(0, 1) < epsilon:
             action = random.choice(ACTIONS)
         else:
             action = int(np.argmax(Q_table[state, :]))
-        
         next_state, reward, done = env.step(action)
         best_next = np.argmax(Q_table[next_state, :]) if not done else 0
         td_target = reward + (gamma * Q_table[next_state, best_next] if not done else 0)
         td_error = td_target - Q_table[state, action]
         Q_table[state, action] += alpha * td_error
-        
         state = next_state
         if done:
             break
 
-# Derive optimal policy from Q_table.
+# Derive optimal policy from the Q-table.
 policy = {s: int(np.argmax(Q_table[s, :])) for s in range(ROWS * COLS)}
 
-# Simulate one episode using the learned policy to get the optimal path (state sequence)
+# Simulate one episode using the learned policy to get the optimal path (state sequence).
 state = env.reset()
 optimal_path = [state]
 actions_taken = []
@@ -155,14 +152,13 @@ Jerry, the mouse, navigates a tiny maze. He always starts at the same starting p
 His aim is to grab the cheese (in S1) and reach his home (S5) safely. However, if he goes down from S1,  
 he may enter S4 where Tom is, and get caught!
 """)
-
-# Display a maze overview image for better visualization.
+# Display maze overview image for visualization.
 st.image("MAze.png", use_column_width=True)
 
 # Slider for animation speed.
-animation_speed = st.slider("Animation Speed (seconds per step)", 0.1, 2.0, 0.5)
+animation_speed = st.slider("Animation Speed (seconds per step)", 0.1, 2.0, 1.5)
 
-# Define image paths for the two scenarios.
+# --- Define Image Paths for the Two Scenarios ---
 optimal_path_images = ["Jerry.png", "Cheese .png", "Blank1.png", "Goal.png"]
 caught_path_images = ["Jerry.png", "CHEESE.png", "TomJErry.png"]
 
@@ -189,15 +185,15 @@ st.subheader("Q-learning Results")
 st.write("Final Q-Table (State vs. Action Values):")
 for s in range(ROWS * COLS):
     pos = state_to_pos(s)
-    st.write(f"State {s} {pos}: {Q_table[s, :]}")
+    st.write(f"State S{s} {pos}: {Q_table[s, :]}")
 
 st.write("Optimal Policy:")
 for s in range(ROWS * COLS):
     pos = state_to_pos(s)
     if s in [4, 5]:
-        st.write(f"State {s} {pos}: Terminal")
+        st.write(f"State S{s} {pos}: Terminal")
     else:
-        st.write(f"State {s} {pos}: {action_map[policy[s]]}")
+        st.write(f"State S{s} {pos}: {action_map[policy[s]]}")
 
 st.write("Optimal Path (State Sequence):", optimal_path)
-st.write("Actions Taken:", [action_map[a] for a in actions_taken])
+st.write("Actions Taken:", actions_taken)
