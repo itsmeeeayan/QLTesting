@@ -59,14 +59,14 @@ class MazeEnv:
         elif action == 3:  # Right
             next_col += 1
 
-        # Check bounds; if move is out-of-bound, stay in current state.
+        # Check bounds; if move is out-of-bound, remain in current state.
         if next_row < 0 or next_row >= ROWS or next_col < 0 or next_col >= COLS:
             next_row, next_col = current_row, current_col
 
         next_state = pos_to_state((next_row, next_col))
         reward = 0
 
-        # Define rewards based on next state:
+        # Determine rewards:
         if next_state == 4:   # S4: Tom's cell => caught
             reward = -10
             self.done = True
@@ -80,7 +80,7 @@ class MazeEnv:
             else:
                 reward = 0
         else:
-            reward = 0  # empty cell
+            reward = 0  # Empty cell
 
         self.state = next_state
         self.steps += 1
@@ -89,15 +89,27 @@ class MazeEnv:
 
         return self.state, reward, self.done
 
+# -----------------------------------
+# Q-learning Training Section
+# -----------------------------------
+
 # Q-learning parameters
-alpha = 0.1   # learning rate
-gamma = 0.99  # discount factor
-epsilon = 0.2 # exploration rate
+alpha = 0.1    # learning rate
+gamma = 0.99   # discount factor
+epsilon = 0.2  # exploration rate
 num_episodes = 1000
 
-# Initialize Q-table for 6 states and 4 actions (2x3 grid)
-Q_table = np.zeros((ROWS * COLS, len(ACTIONS)))
+# Initialize Q-table (all values 0) for 6 states x 4 actions.
+initial_Q_table = np.zeros((ROWS * COLS, len(ACTIONS)))
+Q_table = np.copy(initial_Q_table)  # Working Q-table
+
 env = MazeEnv()
+
+# Display the initial Q-table before training.
+st.sidebar.subheader("Initial Q-Table (All Zeros)")
+for s in range(ROWS * COLS):
+    pos = state_to_pos(s)
+    st.sidebar.write(f"State {s} {pos}: {initial_Q_table[s, :]}")
 
 # Run Q-learning algorithm
 for episode in range(num_episodes):
@@ -119,7 +131,7 @@ for episode in range(num_episodes):
         if done:
             break
 
-# Derive optimal policy from Q_table
+# Derive optimal policy from Q_table.
 policy = {s: int(np.argmax(Q_table[s, :])) for s in range(ROWS * COLS)}
 
 # Simulate one episode using the learned policy to get the optimal path (state sequence)
@@ -134,7 +146,7 @@ while not env.done:
     state = next_state
 
 # -----------------------------------
-# Streamlit App with Image Animation
+# Streamlit App Interface & Image Animation
 # -----------------------------------
 
 st.title("Jerry's Maze Animation with Images")
@@ -143,16 +155,16 @@ Jerry, the mouse, navigates a tiny maze. He always starts at the same starting p
 His aim is to grab the cheese (in S1) and reach his home (S5) safely. However, if he goes down from S1,  
 he may enter S4 where Tom is, and get caught!
 """)
-# Display maze overview image for visualization.
+
+# Display a maze overview image for better visualization.
 st.image("MAze.png", use_column_width=True)
 
-# Slider for animation speed (can adjust later).
-animation_speed = st.slider("Animation Speed (seconds per step)", 0.1, 2.0, 1.5)
+# Slider for animation speed.
+animation_speed = st.slider("Animation Speed (seconds per step)", 0.1, 2.0, 0.5)
 
-# --- Define Image Paths for the Two Scenarios ---
-# Update these paths as necessary.
+# Define image paths for the two scenarios.
 optimal_path_images = ["Jerry.png", "Cheese .png", "Blank1.png", "Goal.png"]
-caught_path_images = ["Jerry.png", "CHEESE.png", "TomJErry.png"]
+caught_path_images = ["Jerry.png", "Cheese.png", "TomJErry.png"]
 
 scenario = st.selectbox("Select Scenario", 
                           ["Optimal Path: Cheese then Home", "Alternate: Gets Caught by Tom"])
@@ -169,7 +181,6 @@ st.write("Click the button below to start the image animation.")
 if st.button("Start Animation"):
     placeholder = st.empty()
     for img_file in path_images:
-        # Display image using Streamlit (make sure images exist at these paths)
         placeholder.image(img_file, use_column_width=True)
         time.sleep(animation_speed)
     st.success("Animation complete!")
