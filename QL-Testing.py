@@ -104,7 +104,7 @@ initial_Q_table = np.zeros((ROWS * COLS, len(ACTIONS)))
 Q_table = np.copy(initial_Q_table)
 env = MazeEnv()
 
-# Display the initial Q-table in sidebar.
+# Display the initial Q-table in the sidebar.
 st.sidebar.subheader("Initial Q-Table (All Zeros)")
 for s in range(ROWS * COLS):
     pos = state_to_pos(s)
@@ -153,7 +153,7 @@ His aim is to grab the cheese (in S1) and reach his home (S5) safely. However, i
 he may enter S4 where Tom is, and get caught!
 """)
 # Display maze overview image for visualization.
-st.image("MAze.png", use_column_width=True)
+st.image("MAze.png", use_container_width=True)
 
 # Slider for animation speed.
 animation_speed = st.slider("Animation Speed (seconds per step)", 0.1, 2.0, 1.5)
@@ -177,7 +177,7 @@ st.write("Click the button below to start the image animation.")
 if st.button("Start Animation"):
     placeholder = st.empty()
     for img_file in path_images:
-        placeholder.image(img_file, use_column_width=True)
+        placeholder.image(img_file, use_container_width=True)
         time.sleep(animation_speed)
     st.success("Animation complete!")
 
